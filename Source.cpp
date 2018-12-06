@@ -12,6 +12,7 @@ int a, b, w;
 int **am;
 int *dis;
 int **ceny;
+int **path;
 int *visited; //all 0
 
 int cdn[10000], index = 0;
@@ -29,6 +30,11 @@ void dijkstra(int **G, int n, int startnode)
 	distance = (int*)malloc(n * sizeof(int));
 	pred     = (int*)malloc(n * sizeof(int));
 	visit    = (int*)malloc(n * sizeof(int));
+
+	path = (int**)malloc(n * sizeof(int*));
+	for (int i = 0; i < n; i++) {
+		path[i] = (int*)malloc(n * sizeof(int));
+	}
 
 	for (i = 0; i < n; i++)
 		for (j = 0; j < n; j++)
@@ -74,13 +80,17 @@ void dijkstra(int **G, int n, int startnode)
 		if (i != startnode)
 		{
 			printf("\n%d = %d", i, distance[i]);
-			printf(": %d", i);
+			printf("    \t: %d", i);
+
+			path[i][0] = i;
 
 			j = i;
+			index = 0;
 			do
 			{
 				j = pred[j];
 				printf("<-%d", j);
+				path[i][index++] = j;
 			} while (j != startnode);
 		}
 
@@ -440,9 +450,15 @@ int *zachran_princezne(char **mapa, int n, int m, int t, int *dlzka_cesty) {
 //	}
 
 	//output
-//	for (int i = 0; i < M; i++) {
-//		printf ("%d - %d\n", i + 1,  dis[i]);
-//	}
+	for (int i = 0; i < M; i++) {
+		printf("%d: %d<-%d", i, i, path[i][0]);
+		for (int j = 1; j < M; j++) {
+			if (path[i][j] > 0)
+				printf("<-%d", path[i][j]);
+		}
+		printf("\n");
+	}
+
 	
 
 	return 0;
