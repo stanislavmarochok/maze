@@ -4,6 +4,9 @@
 #include <windows.h>
 #include <string.h>
 
+#define INFINITY 9999
+#define MAX 10
+
 int N, M;
 int a, b, w;
 int **am;
@@ -13,42 +16,75 @@ int *visited; //all 0
 
 int cdn[10000], index = 0;
 
-int dij(int x) {
-	visited[x] = 1;
+void dijkstra(int **G, int n, int startnode)
+{
+	int **cost, *distance, *pred;
+	int *visit, count, mindistance, nextnode, i, j;
 
-	//update
-	for (int i = 1; i <= M; i++) {
-		if ((visited[i] == 0) && (am[x][i] != -1)) {
-			if ((dis[x] + am[x][i] < dis[i]) || (dis[i] == -1)) {
-				dis[i] = dis[x] + am[x][i];
-				cdn[index] = dis[i];
-				index++;
+	cost = (int**)malloc(n * sizeof(int*));
+	for (int i = 0; i < n; i++) {
+		cost[i] = (int*)malloc(n * sizeof(int));
+	}
+
+	distance = (int*)malloc(n * sizeof(int));
+	pred     = (int*)malloc(n * sizeof(int));
+	visit    = (int*)malloc(n * sizeof(int));
+
+	for (i = 0; i < n; i++)
+		for (j = 0; j < n; j++)
+			if (G[i][j] == 0)
+				cost[i][j] = INFINITY;
+			else
+				cost[i][j] = G[i][j];
+
+	for (i = 0; i < n; i++)
+	{
+		distance[i] = cost[startnode][i];
+		pred[i] = startnode;
+		visit[i] = 0;
+	}
+
+	distance[startnode] = 0;
+	visit[startnode] = 1;
+	count = 1;
+
+	while (count < n - 1)
+	{
+		mindistance = INFINITY;
+
+		for (i = 0; i < n; i++)
+			if (distance[i] < mindistance && !visit[i])
+			{
+				mindistance = distance[i];
+				nextnode = i;
 			}
+
+		visit[nextnode] = 1;
+		for (i = 0; i < n; i++)
+			if (!visit[i])
+				if (mindistance + cost[nextnode][i] < distance[i])
+				{
+					distance[i] = mindistance + cost[nextnode][i];
+					pred[i] = nextnode;
+				}
+		count++;
+	}
+
+	for (i = 0; i < n; i++)
+		if (i != startnode)
+		{
+			printf("\n%d = %d", i, distance[i]);
+			printf(": %d", i);
+
+			j = i;
+			do
+			{
+				j = pred[j];
+				printf("<-%d", j);
+			} while (j != startnode);
 		}
-	}
 
-
-	for (int i = 0; i < index; i++) {
-		printf("%d ", cdn[i]);
-	}
 	printf("\n");
-
-
-	//select new node
-	int smaller = -1, sw = -1;
-	for (int i = 0; i <= M; i++) {
-		if ((visited[i] == 0) && (dis[i] >= 0) && ((sw > dis[i]) || (sw == -1))) {
-			sw = dis[i];
-			smaller = i;
-		}
-	}
-
-	if (smaller != -1) {
-		dij(smaller);
-		return 1;
-	}
-
-	return 0;
 }
 
 void print() {
@@ -62,7 +98,7 @@ void print() {
 	for (int i = 0; i < M; i++) {
 		printf("%3d  ", i + 1);
 		for (int j = 0; j < M; j++) {
-			(am[i][j] == -1) ? printf("    ") : printf("%3d ", am[i][j]);
+			(am[i][j] == 0) ? printf("    ") : printf("%3d ", am[i][j]);
 //			printf("%3d ", am[i][j]);
 		}
 		printf("\n");
@@ -109,7 +145,7 @@ void neigh_table_init(char **mapa, int n, int m) {
 
 	for (int i = 0; i < M; i++) {
 		for (int j = 0; j < M; j++) {
-			am[i][j] = -1;
+			am[i][j] = 0;
 		}
 	}
 
@@ -393,19 +429,20 @@ int *zachran_princezne(char **mapa, int n, int m, int t, int *dlzka_cesty) {
 
 	print();
 
-	dij(0);
+//	dij(0);
+	dijkstra(am, M, 0);
 
 	printf("N = %d, M = %d\n", N, M);
 
 	//update
-	for (int i = 1; i < M; i++) {
-		dis[i] += 1;
-	}
+//	for (int i = 1; i < M; i++) {
+//		dis[i] += 1;
+//	}
 
 	//output
-	for (int i = 0; i < M; i++) {
-		printf ("%d - %d\n", i + 1,  dis[i]);
-	}
+//	for (int i = 0; i < M; i++) {
+//		printf ("%d - %d\n", i + 1,  dis[i]);
+//	}
 	
 
 	return 0;
